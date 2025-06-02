@@ -9,7 +9,7 @@ on:
 env:
   GHCR_IMAGE: ghcr.io/szymonzychyoyo/lab8docker2zadanie # <-- ZMIEN
   DOCKERHUB_USER: szymonz123 # <-- ZMIEN
-  CACHE_IMAGE: szymonz123/repozytorium2zadanie:build
+  CACHE_IMAGE: szymonz123/repozytorium2zadanie:build-cache # <-- ZMIEN
 
 jobs:
   build:
