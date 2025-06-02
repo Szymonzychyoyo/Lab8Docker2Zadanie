@@ -7,7 +7,7 @@ on:
 
 # ────────── ZMIENNE DO PODMIANY ──────────
 env:
-  GHCR_IMAGE: ghcr.io/<TWOJ_GITHUB_LOGIN>/<TWOJE_REPO> # <-- ZMIEN
+  GHCR_IMAGE: ghcr.io/Szymonzychyoyo/Lab8Docker2Zadanie # <-- ZMIEN
   DOCKERHUB_USER: szymonz123 # <-- ZMIEN
   CACHE_IMAGE: szymonz123/repozytorium2zadanie-cache:build
 
