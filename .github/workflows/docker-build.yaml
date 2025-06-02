@@ -3,87 +3,81 @@ name: Build-And-Push-Multiarch
 on:
   push:
     branches: [main]
-    tags: ["v*.*.*"] # gdy będziesz tagował wersje
-  pull_request:
+    tags: ["v*.*.*"]
 
+# ────────── ZMIENNE DO PODMIANY ──────────
 env:
-  IMAGE_NAME: ghcr.io/${{ github.repository }}
+  GHCR_IMAGE: ghcr.io/<TWOJ_GITHUB_LOGIN>/<TWOJE_REPO> # <-- ZMIEN
+  DOCKERHUB_USER: szymonz123 # <-- ZMIEN
+  CACHE_IMAGE: szymonz123/repozytorium2zadanie-cache:build
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    permissions: # potrzebne do zapisu do ghcr
+    permissions:
       contents: read
-      packages: write
+      packages: write # konieczne do pushu w GHCR
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+      # QEMU + Buildx
+      - uses: docker/setup-qemu-action@v3
+        name: Set up QEMU
 
-      - name: Set up Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v3
+        name: Set up Buildx
         with:
           install: true
 
-      # ──────────────────────────────────────────────────────────────
-      # Logowanie do rejestrów
+      # ────────── LOGOWANIA ──────────
+      # GHCR – wbudowany GITHUB_TOKEN (nie musisz nic dodawać)
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.DH_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Login to DockerHub (cache registry)
+      # Docker Hub – jedyny sekret DH_TOKEN
+      - name: Login to DockerHub (cache)
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DH_USER }}
-          password: ${{ secrets.DH_TOKEN }}
+          username: ${{ env.DOCKERHUB_USER }} # jawnie, to nie tajemnica
+          password: ${{ secrets.DH_TOKEN }} # JEDYNY sekret jaki masz
 
-      # ──────────────────────────────────────────────────────────────
-      # Definiujemy tagi + pełną listę platform
-      - name: Extract meta
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: |
-            ${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=semver,pattern={{version}}
-            type=sha,format=short
-
-      # ──────────────────────────────────────────────────────────────
-      # 1. Budowa *pojedynczej* architektury do skanu
-      - name: Build – load amd64 for scan
+      # ────────── BUILD -> SCAN (tylko amd64) ──────────
+      - name: Build amd64 for scan
         uses: docker/build-push-action@v5
         with:
-          context: .
-          platforms: linux/amd64 # tylko jedna
+          context: . # <-- ZMIEN jeżeli Dockerfile jest gdzie indziej
+          file: ../Dockerfile # <-- ZMIEN ścieżkę, jeśli trzeba
+          platforms: linux/amd64
           load: true
-          tags: ${{ env.IMAGE_NAME }}:scan
-          # cache-from / cache-to bez zmian …
+          tags: ${{ env.GHCR_IMAGE }}:scan
+          cache-from: type=registry,ref=${{ env.CACHE_IMAGE }}
+          cache-to: type=registry,ref=${{ env.CACHE_IMAGE }},mode=max
 
-      # 2. Skan Trivy
+      # ────────── TRIVY ──────────
       - name: Scan image with Trivy
         uses: aquasecurity/trivy-action@0.30.0
-
         with:
-          image-ref: ${{ env.IMAGE_NAME }}:scan # tag z poprzedniego kroku
+          image-ref: ${{ env.GHCR_IMAGE }}:scan
           exit-code: "1"
           severity: "CRITICAL,HIGH"
 
-      # 3. Właściwa budowa i push multi-arch (jak masz)
-      - name: Build – push multi-arch to GHCR
+      # ────────── BUILD MULTI-ARCH + PUSH ──────────
+      - name: Build & Push multi-arch
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: . # <-- ZMIEN jeżeli trzeba
+          file: ../Dockerfile # <-- ZMIEN jeżeli trzeba
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          # cache-from / cache-to bez zmian …
+          tags: |
+            ${{ env.GHCR_IMAGE }}:latest
+            ${{ env.GHCR_IMAGE }}:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.CACHE_IMAGE }}
+          cache-to: type=registry,ref=${{ env.CACHE_IMAGE }},mode=max
+          provenance: false
