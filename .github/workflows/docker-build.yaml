@@ -51,8 +51,8 @@ jobs:
       - name: Build amd64 for scan
         uses: docker/build-push-action@v5
         with:
-          context: . # <-- ZMIEN jeżeli Dockerfile jest gdzie indziej
-          file: ../Dockerfile # <-- ZMIEN ścieżkę, jeśli trzeba
+          context: ..
+          file: ../Dockerfile
           platforms: linux/amd64
           load: true
           tags: ${{ env.GHCR_IMAGE }}:scan
@@ -71,8 +71,8 @@ jobs:
       - name: Build & Push multi-arch
         uses: docker/build-push-action@v5
         with:
-          context: . # <-- ZMIEN jeżeli trzeba
-          file: ../Dockerfile # <-- ZMIEN jeżeli trzeba
+          context: ..
+          file: ../Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
