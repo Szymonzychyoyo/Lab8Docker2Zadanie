@@ -58,9 +58,8 @@ jobs:
           push: false
           tags: ${{ env.GHCR_IMAGE }}:scan
           cache-from: type=registry,ref=${{ env.CACHE_IMAGE }}
-          #cache-to: type=registry,ref=${{ env.CACHE_IMAGE }},mode=max
-          cache-to: type=registry,ref=${{ env.CACHE_IMAGE }},mode=max,oci-mediatypes=true,compression=zstd
-          
+          cache-to: type=registry,ref=${{ env.CACHE_IMAGE }},mode=max
+
       # ────────── TRIVY ──────────
       - name: Scan image with Trivy
         uses: aquasecurity/trivy-action@0.30.0
