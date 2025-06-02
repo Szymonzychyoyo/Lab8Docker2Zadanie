@@ -51,8 +51,8 @@ jobs:
       - name: Build amd64 for scan
         uses: docker/build-push-action@v5
         with:
-          context: C:\Users\szymo\OneDrive\Desktop\Semestr6\chumura\Lab8Docker-main\Lab8Docker-main
-          file: C:\Users\szymo\OneDrive\Desktop\Semestr6\chumura\Lab8Docker-main\Lab8Docker-main\Dockerfile
+          context: .
+          file: ./Dockerfile
           platforms: linux/amd64
           load: true
           tags: ${{ env.GHCR_IMAGE }}:scan
