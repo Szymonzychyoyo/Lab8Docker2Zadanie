@@ -8,4 +8,4 @@ To repozytorium zawiera konfigurację GitHub Actions umożliwiającą:
   - **GitHub Container Registry (GHCR)**
   - **Docker Hub**
 
-Cały proces odbywa się automatycznie przy każdym **pushu do gałęzi `main`** lub **stworzeniu taga `v*.*.*`**
+Cały proces odbywa się automatycznie przy każdym **pushu do gałęzi `main`**
