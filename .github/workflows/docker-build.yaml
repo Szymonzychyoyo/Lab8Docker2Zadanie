@@ -54,8 +54,7 @@ jobs:
           context: .
           file: ./Dockerfile
           platforms: linux/amd64
-          #load: true
-          push: false
+          load: true
           tags: ${{ env.GHCR_IMAGE }}:scan
           cache-from: type=registry,ref=${{ env.CACHE_IMAGE }}
           cache-to: type=registry,ref=${{ env.CACHE_IMAGE }},mode=max
