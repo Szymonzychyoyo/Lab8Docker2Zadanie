@@ -59,6 +59,20 @@ jobs:
           cache-from: type=registry,ref=${{ env.CACHE_IMAGE }}
           cache-to: type=registry,ref=${{ env.CACHE_IMAGE }},mode=max
 
+      #dopisane
+      - name: Build & Push with Cache
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: .Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+          cache-from: type=registry,ref=${{ env.CACHE_IMAGE }}
+          cache-to: type=registry,ref=${{ env.CACHE_IMAGE }},mode=max
+          provenance: false
+
       # ────────── TRIVY ──────────
       - name: Scan image with Trivy
         uses: aquasecurity/trivy-action@0.30.0
